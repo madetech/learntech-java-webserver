@@ -37,17 +37,6 @@ public class WebserverTest {
             }
 
             String responseBody = stringBuilder.toString();
-//        BufferedReader in = new BufferedReader(
-//          new InputStreamReader(con.getInputStream())
-//        );
-//
-//        String inputLine;
-//        StringBuffer content = new StringBuffer();
-//        while ((inputLine = in.readLine()) != null) {
-//            content.append(inputLine);
-//        }
-//
-//        in.close();
             reader.close();
 
             assertEquals(responseBody, "<article>Hello World</article>\n");
