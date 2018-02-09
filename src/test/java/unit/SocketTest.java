@@ -1,30 +1,32 @@
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import webserver.Socket;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class SocketTest {
-    @Test public void testCallbackCalled() throws IOException, InterruptedException {
-        StringBuilder requestBody = new StringBuilder();
+    @Test
+    public void testCallbackCalled() throws IOException, InterruptedException {
+        final String[] requestBody = {null};
 
         Socket socket = new Socket((InputStream inputStream, OutputStream outputStream) -> {
             BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line = null;
+            StringBuilder requestBodyBuilder = new StringBuilder();
+            String line;
             try {
                 line = input.readLine();
-                while(!line.equals("")) {
-                    requestBody.append(line);
+
+                while (!line.equals("")) {
+                    requestBodyBuilder.append(line);
                     line = input.readLine();
                 }
 
+                requestBody[0] = requestBodyBuilder.toString();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -39,10 +41,6 @@ public class SocketTest {
                 e.printStackTrace();
             }
 
-            synchronized (requestBody) {
-                requestBody.notify();
-            }
-
             return null;
         });
 
@@ -53,9 +51,6 @@ public class SocketTest {
         con.setRequestMethod("GET");
         con.connect();
 
-        synchronized (requestBody) {
-            requestBody.wait();
-            assertThat(requestBody.toString(), containsString("GET / HTTP/1.1"));
-        }
+        assertThat(requestBody[0], containsString("GET / HTTP/1.1"));
     }
 }
